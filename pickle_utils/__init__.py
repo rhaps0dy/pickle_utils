@@ -16,12 +16,18 @@ def _smart_open(filename, *args, **kwargs):
         raise ValueError("Unknown extension in: `{:s}`. Valid extensions are \".pkl\" and \".pkl.gz\"".format(filename))
 
 def load(filename_or_object):
+    """Like `pickle.load`, but takes as argument a file name or a
+    file-like object. If the argument is a file name, it must end in ".pkl" or
+    ".pkl.gz". In the second case the file will be compressed."""
     if isinstance(filename_or_object, str):
         with _smart_open(filename_or_object, 'rb') as f:
             return pickle.load(f)
     return pickle.load(filename_or_object)
 
 def dump(data, filename_or_object):
+    """Like `pickle.dump`, but takes as second argument a file name or a
+    file-like object. If the argument is a file name, it must end in ".pkl" or
+    ".pkl.gz". In the second case the file will be compressed."""
     if isinstance(filename_or_object, str):
         with _smart_open(filename_or_object, 'wb') as f:
             return pickle.dump(data, f)

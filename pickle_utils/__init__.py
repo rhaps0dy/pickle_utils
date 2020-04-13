@@ -1,37 +1,44 @@
-import os.path
-import pickle
 import functools
 import logging
-import gzip
+import os
+import os.path
+import pathlib
+import tempfile
+import unittest
+
+import pandas as pd
 
 __all__ = ['load', 'dump', 'memoize']
 log = logging.getLogger(__name__)
 
-def _smart_open(filename, *args, **kwargs):
-    if filename[-7:] == '.pkl.gz':
-        return gzip.open(filename, *args, **kwargs)
-    elif filename[-4:] == '.pkl':
-        return open(filename, *args, **kwargs)
-    else:
-        raise ValueError("Unknown extension in: `{:s}`. Valid extensions are \".pkl\" and \".pkl.gz\"".format(filename))
 
-def load(filename_or_object):
+def load(filename_or_object, compression="infer"):
     """Like `pickle.load`, but takes as argument a file name or a
     file-like object. If the argument is a file name, it must end in ".pkl" or
-    ".pkl.gz". In the second case the file will be compressed."""
-    if isinstance(filename_or_object, str):
-        with _smart_open(filename_or_object, 'rb') as f:
-            return pickle.load(f)
-    return pickle.load(filename_or_object)
+    ".pkl.gz". In the second case the file will be compressed.
 
-def dump(data, filename_or_object):
+    Functionality identical to `pandas.read_pickle` (see
+    https://pandas.pydata.org/docs/user_guide/io.html)
+    """
+    if not (isinstance(filename_or_object, (str, pathlib.Path))
+            or hasattr(filename_or_object, '__fspath__')):
+        compression = None
+    return pd.read_pickle(filename_or_object, compression=compression)
+
+
+def dump(data, filename_or_object, compression="infer"):
     """Like `pickle.dump`, but takes as second argument a file name or a
     file-like object. If the argument is a file name, it must end in ".pkl" or
-    ".pkl.gz". In the second case the file will be compressed."""
-    if isinstance(filename_or_object, str):
-        with _smart_open(filename_or_object, 'wb') as f:
-            return pickle.dump(data, f)
-    return pickle.dump(data, filename_or_object)
+    ".pkl.gz". In the second case the file will be compressed.
+
+    Functionality identical to `pandas.to_pickle` (see
+    https://pandas.pydata.org/docs/user_guide/io.html)
+    """
+    if not (isinstance(filename_or_object, (str, pathlib.Path))
+            or hasattr(filename_or_object, '__fspath__')):
+        compression = None
+    return pd.to_pickle(data, filename_or_object, compression=compression)
+
 
 def memoize(filename, log_level='info'):
     """Decorator to memoize the output of a function to `filename` with pickle.
@@ -68,10 +75,6 @@ def memoize(filename, log_level='info'):
     return pk_decorator
 
 ### Testing
-
-import unittest
-import tempfile
-import os
 
 class Test(unittest.TestCase):
     def setUp(self):

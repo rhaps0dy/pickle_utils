@@ -1,3 +1,5 @@
+You should use `pandas.read_pickle` and `pandas.to_pickle` instead for `load` and `dump`.
+
 Available functions:
 
 load(filename_or_object):
@@ -5,7 +7,10 @@ load(filename_or_object):
     is a file name, it must end in ".pkl" or ".pkl.gz". In the second case the
     file will be compressed.
 
+    Use `pandas.read_pickle` instead.
+
 dump(data, filename_or_object): same as before but dump data to disk.
+    Use `pandas.to_pickle` instead.
 
 @memoize(filename, log_level=info):
     Decorator to memoize the output of a function to `filename` with pickle. The
